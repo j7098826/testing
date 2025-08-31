@@ -1,0 +1,625 @@
+<section class="upload-section" id="uploadSection" style="display: none;">
+            <h2>Add New Video</h2>
+            <form class="upload-form" onsubmit="addVideo(event)">
+                <div class="form-group">
+                    <label class="form-label">Video Title</label>
+                    <input type="text" class="form-input" id="videoTitle" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Video URL (YouTube, Vimeo, etc.)</label>
+                    <input type="url" class="form-input" id="videoUrl" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-input form-textarea" id="videoDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-input" id="videoCategory">
+                        <option value="education">Education</option>
+                        <option value="entertainment">Entertainment</option>
+                        <option value="tech">Technology</option>
+                        <option value="music">Music</option>
+                        <option value="sports">Sports</option>
+                        <option value="gaming">Gaming</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tags (comma separated)</label>
+                    <input type="text" class="form-input" id="videoTags" placeholder="learning, tutorial, beginner">
+                </div>
+                <button type="submit" class="add-video-btn">Add Video</button>
+            </form>
+        </section><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamHub - Video Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 2px solid #00ff88;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 500px;
+            margin: 0 2rem;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px 50px 12px 20px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-bar:focus {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #00ff88;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .search-btn:hover {
+            color: #00ccff;
+        }
+
+        .upload-btn {
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero-section {
+            text-align: center;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #00ff88, #00ccff, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
+            to { text-shadow: 0 0 30px rgba(0, 204, 255, 0.8), 0 0 40px rgba(0, 204, 255, 0.3); }
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+        }
+
+
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .video-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .video-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(45deg, #333, #555);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .thumbnail-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .video-card:hover .thumbnail-img {
+            transform: scale(1.1);
+        }
+
+        .play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #00ff88;
+            transition: all 0.3s ease;
+        }
+
+        .video-card:hover .play-overlay {
+            background: rgba(0, 255, 136, 0.8);
+            color: black;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .video-info {
+            padding: 1.5rem;
+        }
+
+        .video-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .video-meta {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .video-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: rgba(0, 255, 136, 0.2);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            color: #00ff88;
+        }
+
+
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+            border: 2px solid #00ff88;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #00ff88;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        .video-player {
+            width: 100%;
+            max-width: 900px;
+            height: 500px;
+            border-radius: 10px;
+            background: #000;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .search-container {
+                margin: 0;
+                max-width: 100%;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .categories {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">StreamHub</div>
+            <div class="search-container">
+                <input type="text" class="search-bar" placeholder="Search videos..." id="searchInput">
+                <button class="search-btn" onclick="searchVideos()">🔍</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        <section class="hero-section">
+            <h1 class="hero-title">Welcome to StreamHub</h1>
+            <p class="hero-subtitle">Discover amazing videos from creators around the world</p>
+        </section>
+
+
+
+        <section class="upload-section" id="uploadSection" style="display: none;">
+            <h2>Add New Video</h2>
+            <form class="upload-form" onsubmit="addVideo(event)">
+                <div class="form-group">
+                    <label class="form-label">Video Title</label>
+                    <input type="text" class="form-input" id="videoTitle" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Video URL (YouTube, Vimeo, etc.)</label>
+                    <input type="url" class="form-input" id="videoUrl" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-input form-textarea" id="videoDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-input" id="videoCategory">
+                        <option value="education">Education</option>
+                        <option value="entertainment">Entertainment</option>
+                        <option value="tech">Technology</option>
+                        <option value="music">Music</option>
+                        <option value="sports">Sports</option>
+                        <option value="gaming">Gaming</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tags (comma separated)</label>
+                    <input type="text" class="form-input" id="videoTags" placeholder="learning, tutorial, beginner">
+                </div>
+                <button type="submit" class="add-video-btn">Add Video</button>
+            </form>
+        </section>
+
+        <div class="video-grid" id="videoGrid">
+            <!-- Videos will be populated here -->
+        </div>
+    </main>
+
+    <div class="modal" id="videoModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <div id="videoPlayerContainer"></div>
+            <div id="videoDetails"></div>
+        </div>
+    </div>
+
+
+
+    <footer class="footer">
+        <p>&copy; 2025 StreamHub. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Videos will be loaded from CMS
+        let videos = [];
+
+        // Load videos from JSON file (generated by Netlify CMS)
+        async function loadVideos() {
+            try {
+                const response = await fetch('/videos.json');
+                if (response.ok) {
+                    videos = await response.json();
+                } else {
+                    // Fallback to sample videos if no CMS content
+                    videos = [
+                        {
+                            id: 1,
+                            title: "Introduction to Web Development",
+                            url: "https://sample-videos.com/zip/10/mp4/480/SampleVideo_1280x720_1mb.mp4",
+                            thumbnail: "https://via.placeholder.com/320x180/00ff88/000000?text=Web+Dev+Tutorial",
+                            description: "Learn the basics of web development with HTML, CSS, and JavaScript",
+                            tags: ["web development", "tutorial", "beginner"],
+                            views: "10.5K",
+                            duration: "15:30"
+                        },
+                        {
+                            id: 2,
+                            title: "Amazing Nature Documentary",
+                            url: "https://sample-videos.com/zip/10/mp4/720/SampleVideo_1280x720_2mb.mp4",
+                            thumbnail: "https://via.placeholder.com/320x180/00ccff/000000?text=Nature+Doc",
+                            description: "Explore the wonders of nature in this stunning documentary",
+                            tags: ["nature", "documentary", "wildlife"],
+                            views: "25.2K",
+                            duration: "45:12"
+                        }
+                    ];
+                }
+            } catch (error) {
+                console.log('Loading sample videos...');
+                // Fallback sample videos
+                videos = [
+                    {
+                        id: 1,
+                        title: "Sample Video 1",
+                        url: "https://sample-videos.com/zip/10/mp4/480/SampleVideo_1280x720_1mb.mp4",
+                        thumbnail: "https://via.placeholder.com/320x180/00ff88/000000?text=Sample+1",
+                        description: "This is a sample video",
+                        tags: ["sample"],
+                        views: "0",
+                        duration: "N/A"
+                    }
+                ];
+            }
+            renderVideos();
+        }
+
+        // Initialize the page
+        async function init() {
+            await loadVideos();
+        }
+
+
+
+
+
+        // Render videos based on search
+        function renderVideos(searchTerm = '') {
+            const videoGrid = document.getElementById('videoGrid');
+            let filteredVideos = videos;
+
+            // Filter by search term
+            if (searchTerm) {
+                filteredVideos = filteredVideos.filter(video => 
+                    video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    video.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    video.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+                );
+            }
+
+            videoGrid.innerHTML = filteredVideos.map(video => `
+                <div class="video-card" onclick="openVideo(${video.id})">
+                    <div class="video-thumbnail">
+                        <img src="${video.thumbnail}" alt="${video.title}" class="thumbnail-img">
+                        <div class="play-overlay">▶</div>
+                    </div>
+                    <div class="video-info">
+                        <h3 class="video-title">${video.title}</h3>
+                        <div class="video-meta">${video.views} views • ${video.duration}</div>
+                        <div class="video-tags">
+                            ${video.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filter videos by category
+        function filterCategory(category) {
+            currentFilter = category;
+            
+            // Update active button
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            renderVideos();
+        }
+
+        // Search videos
+        function searchVideos() {
+            const searchTerm = document.getElementById('searchInput').value;
+            renderVideos(searchTerm);
+        }
+
+        // Handle search on Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchVideos();
+            }
+        });
+
+        // Toggle upload section
+        function toggleUploadSection() {
+            const uploadSection = document.getElementById('uploadSection');
+            uploadSectionVisible = !uploadSectionVisible;
+            uploadSection.style.display = uploadSectionVisible ? 'block' : 'none';
+        }
+
+        // Add new video
+        function addVideo(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('videoTitle').value;
+            const url = document.getElementById('videoUrl').value;
+            const description = document.getElementById('videoDescription').value;
+            const category = document.getElementById('videoCategory').value;
+            const tags = document.getElementById('videoTags').value.split(',').map(tag => tag.trim());
+
+            // Create new video object (direct MP4 link)
+            const newVideo = {
+                id: videos.length + 1,
+                title: title,
+                url: url, // Direct video URL
+                thumbnail: `https://via.placeholder.com/320x180/00ff88/000000?text=${encodeURIComponent(title.substring(0, 20))}`,
+                description: description,
+                tags: tags,
+                views: "0",
+                duration: "N/A"
+            };
+
+            videos.unshift(newVideo);
+            renderVideos();
+            
+            // Close modal and show success
+            closeAddVideoModal();
+            alert('Video added successfully!');
+        }
+
+
+
+        // Open video in modal with HTML5 video player
+        function openVideo(videoId) {
+            const video = videos.find(v => v.id === videoId);
+            if (!video) return;
+
+            const modal = document.getElementById('videoModal');
+            const playerContainer = document.getElementById('videoPlayerContainer');
+            const detailsContainer = document.getElementById('videoDetails');
+
+            // Use HTML5 video player for direct video files
+            playerContainer.innerHTML = `
+                <video class="video-player" controls autoplay>
+                    <source src="${video.url}" type="video/mp4">
+                    <source src="${video.url}" type="video/webm">
+                    <source src="${video.url}" type="video/ogg">
+                    Your browser does not support the video tag.
+                </video>
+            `;
+
+            detailsContainer.innerHTML = `
+                <h2 style="margin: 1rem 0; color: #00ff88;">${video.title}</h2>
+                <p style="margin-bottom: 1rem; color: rgba(255,255,255,0.8);">${video.description}</p>
+                <div style="margin-bottom: 1rem; color: rgba(255,255,255,0.6);">
+                    ${video.views} views
+                </div>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    ${video.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        // Close modal
+        function closeModal() {
+            const modal = document.getElementById('videoModal');
+            const playerContainer = document.getElementById('videoPlayerContainer');
+            modal.style.display = 'none';
+            playerContainer.innerHTML = ''; // Stop video playback
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('videoModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+
+
+        // Initialize the page when loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
