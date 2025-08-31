@@ -621,27 +621,14 @@
         // Initialize the page when loaded
         document.addEventListener('DOMContentLoaded', init);
     </script>
-<script>
-  // ✅ Detect Netlify Identity invite links and forward to /admin/
-  if (window.location.hash && window.location.hash.includes("invite_token")) {
-    window.location.href = "/admin/" + window.location.hash;
-  }
+            <script>
+  (function() {
+    const hash = window.location.hash;
+    if (hash.startsWith("#invite_token=")) {
+      window.location.href = "/admin/" + hash; 
+    }
+  })();
 </script>
-            <!-- Netlify Identity Widget -->
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-<script>
-  // When a user logs in, send them to /admin/
-  if (window.netlifyIdentity) {
-    window.netlifyIdentity.on("init", user => {
-      if (!user) {
-        window.netlifyIdentity.on("login", () => {
-          document.location.href = "/admin/";
-        });
-      }
-    });
-  }
-</script>
-
 
 </body>
 </html>
