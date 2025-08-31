@@ -1,0 +1,2 @@
+/#invite_token=:token  /admin/  302!
+/admin/*                /admin/index.html   200
