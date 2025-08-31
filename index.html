@@ -633,11 +633,24 @@
 <script>
   if (window.netlifyIdentity) {
     window.netlifyIdentity.on("init", user => {
-      if (!user) {
+      // Handle invitation token from URL
+      const params = new URLSearchParams(window.location.hash.substring(1));
+      const inviteToken = params.get('invite_token');
+      
+      if (inviteToken) {
+        // Open the identity widget for invitation acceptance
+        window.netlifyIdentity.open('signup');
+      } else if (!user) {
         window.netlifyIdentity.on("login", () => {
           document.location.href = "/admin/";
         });
       }
+    });
+    
+    // Handle successful signup
+    window.netlifyIdentity.on("signup", user => {
+      window.netlifyIdentity.close();
+      document.location.href = "/admin/";
     });
   }
 </script>
