@@ -1,0 +1,20 @@
+backend:
+  name: git-gateway
+  branch: main # or master if that's your default branch
+
+media_folder: "images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  - name: "videos"
+    label: "Videos"
+    folder: "_videos"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Video URL (.mp4)", name: "videoUrl", widget: "string", hint: "Direct link to MP4 file (e.g., https://example.com/video.mp4)" }
+      - { label: "Description", name: "description", widget: "text", required: false }
+      - { label: "Tags", name: "tags", widget: "list", allow_add: true, required: false }
+      - { label: "Views", name: "views", widget: "string", default: "0", required: false }
+      - { label: "Duration", name: "duration", widget: "string", default: "N/A", required: false }
